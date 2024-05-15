@@ -127,6 +127,7 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+museum_env/
 
 # Spyder project settings
 .spyderproject
@@ -135,6 +136,8 @@ venv.bak/
 # Rope project settings
 .ropeproject
 
+# Database
+/database/*
 # mkdocs documentation
 /site
 
