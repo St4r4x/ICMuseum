@@ -39,7 +39,7 @@ test_transform = transforms.Compose([
 ])
 
 # Charger les données
-image_dir = "./musée"
+image_dir = "./musee"
 image_paths = [os.path.join(image_dir, image) for image in os.listdir(image_dir) if image.endswith('.jpg')]
 # Extraire les labels à partir des noms de fichiers
 labels = [os.path.splitext(os.path.basename(path))[0].split('.')[0] for path in image_paths]
