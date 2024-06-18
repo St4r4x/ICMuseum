@@ -10,7 +10,7 @@ __pycache__/
 # Ignorer les fichiers de poids
 *.pth
 *.pt
-
+/runs/
 # Ne pas ignorer les images dans le dossier 'test'
 !/test/*.jpg
 !/test/*.jpeg

@@ -1,26 +1,28 @@
 # infer.py
 import torch
-from torchvision import transforms
+from torchvision import transforms,models
 from PIL import Image
-from torchvision import models
+import os
+import torch.nn as nn
 
 # Définissez vos transformations d'inférence
-infer_transform = transforms.Compose([
-    transforms.Resize(256),
-    transforms.CenterCrop(224),
+transform = transforms.Compose([
+    transforms.Resize((224, 224)),
     transforms.ToTensor(),
     transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
 ])
-
-def load_model(model_path):
+def load_model(model_path, num_classes, device):
     model = models.resnet50(pretrained=False)
+    num_ftrs = model.fc.in_features
+    model.fc = nn.Linear(num_ftrs, num_classes)  # Change the number of output classes
     model.load_state_dict(torch.load(model_path))
-    model.eval()
+    model.to(device)  # Move the model to the correct device
     return model
 
-def infer_image(model, image_path, device='cpu'):
+
+def infer(model, image_path, device):
     image = Image.open(image_path)
-    image = infer_transform(image).unsqueeze(0).to(device)
+    image = transform(image).unsqueeze(0).to(device)  # Move the input data to the correct device
 
     with torch.no_grad():  # No need to track gradients for inference
         outputs = model(image)
@@ -32,14 +34,19 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser(description='Inference script')
-    parser.add_argument('--image_path', type=str, help='Path to the image to infer')
+    parser.add_argument('--images_dir', type=str, help='Path to the directory with images to infer')
     parser.add_argument('--model_path', type=str, help='Path to the saved model')
 
     args = parser.parse_args()
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-    model = load_model(args.model_path)
-    predicted_class = infer_image(model, args.image_path, device=device)
+    # Load the model
+    num_classes = 20  # Change this to the number of classes you trained your model with
+    model = load_model(args.model_path, num_classes, device)
 
-    print(f'The predicted class for the image {args.image_path} is {predicted_class}')
+    for filename in os.listdir(args.images_dir):
+        if filename.endswith('.jpg'):
+            image_path = os.path.join(args.images_dir, filename)
+            prediction = infer(model, image_path,device)
+            print(f'Prediction for {filename}: {prediction}')
