@@ -3,7 +3,7 @@ import shutil
 from PIL import Image, ImageEnhance
 
 # Dossier contenant les images originales
-input_dir = './musee'
+input_dir = './data'
 
 # Dossiers pour sauvegarder les images originales et générées
 test_dir = './data/test'

@@ -15,20 +15,25 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 train_dir = "./data/train"
 test_dir = "./data/test"
 
-# Custom Dataset Class
-class PaintingDataset(Dataset):
-    def __init__(self, image_paths, labels, transform=None):
-        self.image_paths = image_paths
-        self.labels = labels
+class CustomImageDataset(Dataset):
+    def __init__(self, csv_file, img_dir, transform=None):
+        self.img_labels = pd.read_csv(csv_file)
+        self.img_dir = img_dir
         self.transform = transform
 
+        # Map labels to integers
+        unique_labels = sorted(self.img_labels['label'].unique())
+        self.label_to_int = {label: idx for idx, label in enumerate(unique_labels)}
+        self.img_labels['label'] = self.img_labels['label'].map(self.label_to_int)
+
     def __len__(self):
-        return len(self.image_paths)
+        return len(self.img_labels)
 
     def __getitem__(self, idx):
-        image_path = self.image_paths[idx]
-        image = Image.open(image_path).convert('RGB')
-        label = self.labels[idx]
+        img_name = self.img_labels.iloc[idx, 0]
+        label = self.img_labels.iloc[idx, 1]
+        img_path = os.path.join(self.img_dir, img_name)
+        image = Image.open(img_path).convert("RGB")
         if self.transform:
             image = self.transform(image)
         return image, label
@@ -64,8 +69,8 @@ test_transform = transforms.Compose([
 ])
 
 # Create datasets and dataloaders
-train_dataset = PaintingDataset(train_paths, train_labels, transform=train_transform)
-test_dataset = PaintingDataset(test_paths, test_labels, transform=test_transform)
+train_dataset = CustomImageDataset(train_paths, train_labels, transform=train_transform)
+test_dataset = CustomImageDataset(test_paths, test_labels, transform=test_transform)
 
 train_dataloader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
 test_dataloader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)

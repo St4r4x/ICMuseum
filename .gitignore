@@ -14,3 +14,6 @@ __pycache__/
 # Ne pas ignorer les images dans le dossier 'test'
 !/test/*.jpg
 !/test/*.jpeg
+
+*.pkl
+*.csv
